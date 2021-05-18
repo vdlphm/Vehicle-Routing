@@ -1,5 +1,5 @@
 from random import random
-from canh.modules.PSO.Optimizer import Optimizer
+from modules.PSO.Optimizer import Optimizer
 class Particle:
     def __init__(self, x):
         self.xSolution = Optimizer.copyFromArray(x)

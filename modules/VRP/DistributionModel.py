@@ -1,5 +1,5 @@
-from canh.modules.VRP.Store import Store
-from canh.modules.VRP.Vehicle import Vehicle
+from modules.VRP.Store import Store
+from modules.VRP.Vehicle import Vehicle
 import numpy as np
 from random import randint
 class DistributionModel:

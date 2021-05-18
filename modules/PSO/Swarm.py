@@ -1,6 +1,6 @@
-from canh.modules.PSO.Optimizer import Optimizer
-from canh.modules.VRP.DistributionModel import DistributionModel
-from canh.modules.PSO.Particle import Particle
+from modules.PSO.Optimizer import Optimizer
+from modules.VRP.DistributionModel import DistributionModel
+from modules.PSO.Particle import Particle
 import sys
 
 

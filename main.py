@@ -1,6 +1,6 @@
-from canh.modules.VRP.DistributionModel import DistributionModel
-from canh.modules.PSO.Swarm import Swarm
-from canh.modules.VRP.Store import Store
+from modules.VRP.DistributionModel import DistributionModel
+from modules.PSO.Swarm import Swarm
+from modules.VRP.Store import Store
 import numpy as np
 
 
