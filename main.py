@@ -1,12 +1,9 @@
 from modules.VRP.DistributionModel import DistributionModel
 from modules.PSO.Swarm import Swarm
-from modules.VRP.Store import Store
-import numpy as np
 
-
-S = 5
-Q = [12, 15, 20]
-K = 3
+S = 3
+Q = [40]
+K = 1
 
 MSD = 10
 MSR = 5
@@ -15,17 +12,6 @@ N = 3
 T = 12
 print('Store')
 dm = DistributionModel(S,Q,K,MSD,MSR)
-"""dm.distanceMatrix = np.array([[0.0, 37.0, 11.0, 32.0, 29.0, 35.0],
-                              [37.0, 0.0, 9.0, 42.0, 35.0, 21.0],
-                              [11.0, 9.0, 0.0, 25.0, 18.0, 5.0],
-                              [32.0, 42.0, 25.0, 0.0, 31.0, 14.0],
-                              [29.0, 35.0, 18.0, 31.0, 0.0, 35.0],
-                              [35.0, 21.0, 25.0, 14.0, 35.0, 0.0]
-                              ])
-s = []
-for i in [[3, 1], [5, 3], [4, 2], [4, 3], [1, 0]]:
-    s.append(Store(i[0], i[1]))
-dm.stores = s"""
 
 dm.modelSummary()
 print('-----------------------------------------\nSwarm model\n-----------------------------------------')
@@ -48,11 +34,11 @@ for i in range(1, T):
 print("Decode gBest Solution\n------------------------------------------")
 optimalRoute = swarm.decodeOptimalSolution()
 print("Optimal Route: " + str(optimalRoute))
-print("\ndropoff only\n------------------------------------------")
+"""print("\ndrop-off only\n------------------------------------------")
 distNoPick = dm.analyzeOptimalRoute(optimalRoute)
 for e in distNoPick.keys():
-    print("{} -> {}".format(e, distNoPick[e]))
-print("\npickup and dropoff\n------------------------------------------")
+    print("{} -> {}".format(e, distNoPick[e]))"""
+print("\npickup and drop-off\n------------------------------------------")
 distPick = dm.analyzeOptimalRouteSimultaneous(optimalRoute)
 for e in distPick.keys():
     print("{} -> {}".format(e, distPick[e]))

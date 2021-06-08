@@ -1,5 +1,7 @@
 from random import random
 from modules.PSO.Optimizer import Optimizer
+
+
 class Particle:
     def __init__(self, x):
         self.xSolution = Optimizer.copyFromArray(x)
@@ -9,7 +11,6 @@ class Particle:
         self.xFitnessValue = 0.0
         self.pBestValue = 0.0
 
-    
     def setRandomVelocities(self, n):
         pVelocity = []
         for i in range(n):
@@ -21,7 +22,7 @@ class Particle:
         return random() * upper
 
     def __str__(self):
-        s = "Paticle [xSolution=" + str(self.xSolution) + ", xFitnessValue="\
-            + str(self.xFitnessValue) + ", pBest=" + str(self.pBest)\
+        s = "Paticle [xSolution=" + str(self.xSolution) + ", xFitnessValue=" \
+            + str(self.xFitnessValue) + ", pBest=" + str(self.pBest) \
             + ", pVelocity=" + str(self.pVelocity) + "]"
         return s

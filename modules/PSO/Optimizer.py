@@ -1,5 +1,6 @@
 from random import randint
 
+
 class Optimizer:
     @classmethod
     def shuffleArray(cls, ar):

@@ -1,5 +1,4 @@
 from modules.PSO.Optimizer import Optimizer
-from modules.VRP.DistributionModel import DistributionModel
 from modules.PSO.Particle import Particle
 import sys
 
@@ -7,17 +6,20 @@ import sys
 class Swarm:
     def __init__(self, noOfParticles, dm):
         self.distanceMatrix = dm.distanceMatrix
+        self.timeMatrix = dm.timeMatrix
         solutionLength = dm.noOfStore
+
         self.possibleSolution = []
         for i in range(solutionLength):
             self.possibleSolution.append(i + 1)
-        self.particles = []
 
+        self.particles = []
         for i in range(noOfParticles):
-            Optimizer.shuffleArray(self.possibleSolution)
+            self.possibleSolution = Optimizer.shuffleArray(self.possibleSolution)
             self.particles.append(Particle(self.possibleSolution))
             self.particles[i].xFitnessValue = self.generateFitnessValue(self.particles[i].xSolution)
             self.particles[i].pBestValue = self.generateFitnessValue(self.particles[i].pBest)
+
         self.gBest = []
         self.gBestVelocity = []
         self.gFitnessValue = sys.float_info.max
@@ -28,9 +30,9 @@ class Swarm:
         fitnessSum = 0
         for i in range(len(currentSolution)):
             v = int(round(currentSolution[i]))
-            fitnessSum += self.distanceMatrix[prevStore][v]
+            fitnessSum += self.distanceMatrix[prevStore][v] + self.timeMatrix[prevStore][v] # possible adding here
             prevStore = v
-        fitnessSum += self.distanceMatrix[prevStore][0]
+        fitnessSum += self.distanceMatrix[prevStore][0] + self.timeMatrix[prevStore][0] # possible adding here
 
         return fitnessSum
 
@@ -75,7 +77,7 @@ class Swarm:
 
     def __updateSolution(self, p):
         for i in range(len(p.xSolution)):
-            if (p.xSolution[i] + p.pVelocity[i] > len(p.xSolution)):
+            if (p.xSolution[i] + p.pVelocity[i]) > len(p.xSolution):
                 p.xSolution[i] = len(p.xSolution)
             else:
                 p.xSolution[i] = (p.xSolution[i] + p.pVelocity[i])
