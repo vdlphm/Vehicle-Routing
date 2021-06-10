@@ -7,7 +7,7 @@ class Swarm:
     def __init__(self, noOfParticles, dm):
         self.distanceMatrix = dm.distanceMatrix
         self.timeMatrix = dm.timeMatrix
-        solutionLength = dm.noOfStore
+        solutionLength = dm.noOfNode
 
         self.possibleSolution = []
         for i in range(solutionLength):
@@ -84,8 +84,8 @@ class Swarm:
         return p
 
     def decodeOptimalSolution(self):
-        print('gFitnessValue: {}'.format(self.gFitnessValue))
-        print('gBest: {}'.format(self.gBest))
+        #print('gFitnessValue: {}'.format(self.gFitnessValue))
+        #print('gBest: {}'.format(self.gBest))
 
         indicies = dict()
 
@@ -122,8 +122,8 @@ class Swarm:
             if not(index in particleProgress.keys()):
                 particleProgress[index] = dict()
             particleProgress[index][float(t)] = p.pBestValue
-            s += "{}\t{}\t\t".format(p.xFitnessValue, p.pBestValue)
+            s += "aaa{}\tvvv{}\t\t".format(p.xFitnessValue, p.pBestValue)
             pno += 1
         s += str(self.gFitnessValue)
-        print(s)
+        #print(s)
         return particleProgress
