@@ -1,4 +1,4 @@
-from modules.VRP.Store import Store
+from modules.VRP.Node import Node
 from modules.VRP.Vehicle import Vehicle
 import numpy as np
 from random import randint
@@ -6,38 +6,20 @@ from random import randint
 count = 0
 
 class DistributionModel:
-    def __init__(self, storeCount, vehicleCapacity, vehicleCount, msd, msr):
-        self.noOfStore = storeCount
+    def __init__(self, nodeCount, vehicleCapacity, vehicleCount, distanceMatrix, timeMatrix, nodeDelivery, nodePickup, nodeOpen, nodeClose):
+        self.noOfNode = nodeCount
         self.noOfVehicle = vehicleCount
-        self.distanceMatrix = np.zeros((self.noOfStore + 1, self.noOfStore + 1))
-        self.stores = []
+        self.distanceMatrix = distanceMatrix
+        self.nodes = []
         self.vehicles = []
-        self.timeMatrix = np.zeros((self.noOfStore + 1, self.noOfStore + 1))
+        self.timeMatrix = timeMatrix
 
-        # set up distance matrix between stores
-        for i in range(self.noOfStore + 1):
-            for j in range(i, self.noOfStore + 1):
-                if i == j:
-                    self.distanceMatrix[i][j] = 0
-                else:
-                    dist = self.getRandomValue(50)
-                    self.distanceMatrix[i][j] = dist
-                    self.distanceMatrix[j][i] = dist
-                    time = self.getRandomValue(3)
-                    self.timeMatrix[i][j] = time
-                    self.timeMatrix[j][i] = time
+        # set up Nodes
+        for i in range(self.noOfNode):
+            delivery = nodeDelivery[i + 1]
+            pickup = nodePickup[i + 1]
+            self.nodes.append(Node([nodeOpen[i + 1], nodeClose[i + 1]], delivery, pickup))
 
-        # set up stores
-        for i in range(self.noOfStore):
-            demand = self.getRandomValue(msd)
-            rec = self.getRandomValue(msr)
-            if rec > demand:
-                temp = demand
-                demand = rec
-                rec = temp
-            elif rec == demand:
-                rec -= 1
-            self.stores.append(Store(demand, rec))
 
         # set up vehicles
         for i in range(self.noOfVehicle):
@@ -52,43 +34,43 @@ class DistributionModel:
     def routeCapacity(self, route):
         totalCap = 0
         for i in route:
-            totalCap += self.stores[i - 1].demand
+            totalCap += self.nodes[i - 1].delivery
         return totalCap
 
-    def analyzeOptimalRouteSimultaneous(self, optimalRoute):
+    def analyzeOptimalRouteSimultaneous(self, optimalRoute, nodeName):
         distribution = dict()
         for v in range(self.noOfVehicle):
             r = [0]
             tripsCount = 0
             #totalDistance = 0
             availableCapacity = self.routeCapacity(optimalRoute)
-            availableRecyclables = 0
+            availablePickup = 0
             i = 0
-            time = 7
-            store_visited = [False] * self.noOfStore
+            time = 8
+            node_visited = [False] * self.noOfNode
             while i < len(optimalRoute): # possible modification
-                storeCapacity = self.stores[optimalRoute[i] - 1].demand
-                storeRecycle = self.stores[optimalRoute[i] - 1].recylables
-                if (storeRecycle + availableCapacity - storeCapacity + availableRecyclables) < self.vehicles[v].capacity \
-                        and storeCapacity <= availableCapacity:
+                nodeCapacity = self.nodes[optimalRoute[i] - 1].delivery
+                nodeRecycle = self.nodes[optimalRoute[i] - 1].pickup
+                if (nodeRecycle + availableCapacity - nodeCapacity + availablePickup) < self.vehicles[v].capacity \
+                        and nodeCapacity <= availableCapacity:
                     r.append(optimalRoute[i])
                     temp_time = time + self.timeMatrix[r[r.index(optimalRoute[i]) - 1]][optimalRoute[i]]
-                    store_tw = self.stores[optimalRoute[i] - 1].tw
+                    node_tw = self.nodes[optimalRoute[i] - 1].tw
                     if temp_time > 24:
-                        temp_time = store_tw[0]
-                    if store_tw[0] <= temp_time <= store_tw[1]:
+                        temp_time = node_tw[0]
+                    if node_tw[0] <= temp_time <= node_tw[1]:
                         time = temp_time
-                        availableCapacity = availableCapacity - storeCapacity
-                        availableRecyclables += storeRecycle
+                        availableCapacity -= nodeCapacity
+                        availablePickup += nodeRecycle
                         #r.append(optimalRoute[i])
                         #totalDistance += self.distanceMatrix[r[r.index(optimalRoute[i]) - 1]][optimalRoute[i]]
-                        store_visited[optimalRoute[i] - 1] = True
+                        node_visited[optimalRoute[i] - 1] = True
                     else:
                         r.remove(optimalRoute[i])
                 else:
                     tripsCount += 1
                     availableCapacity = self.vehicles[v].capacity
-                    availableRecyclables = 0
+                    availablePickup = 0
                     r.append(0)
                     #totalDistance += self.distanceMatrix[optimalRoute[i - 1]][0]
                     i -= 1
@@ -97,20 +79,20 @@ class DistributionModel:
             i = 0
             #time = 7
             while i < len(optimalRoute):  # possible modification
-                if not store_visited[optimalRoute[i] - 1]:
-                    storeCapacity = self.stores[optimalRoute[i] - 1].demand
-                    storeRecycle = self.stores[optimalRoute[i] - 1].recylables
-                    if (storeRecycle + availableCapacity - storeCapacity + availableRecyclables) < self.vehicles[v].capacity \
-                            and storeCapacity <= availableCapacity:
+                if not node_visited[optimalRoute[i] - 1]:
+                    nodeCapacity = self.nodes[optimalRoute[i] - 1].delivery
+                    nodeRecycle = self.nodes[optimalRoute[i] - 1].pickup
+                    if (nodeRecycle + availableCapacity - nodeCapacity + availablePickup) < self.vehicles[v].capacity \
+                            and nodeCapacity <= availableCapacity:
                         r.append(optimalRoute[i])
-                        availableCapacity = availableCapacity - storeCapacity
-                        availableRecyclables += storeRecycle
+                        availableCapacity = availableCapacity - nodeCapacity
+                        availablePickup += nodeRecycle
                         #totalDistance += self.distanceMatrix[r[r.index(optimalRoute[i]) - 1]][optimalRoute[i]]
-                        store_visited[optimalRoute[i] - 1] = True
+                        node_visited[optimalRoute[i] - 1] = True
                     else:
                         tripsCount += 1
                         availableCapacity = self.vehicles[v].capacity
-                        availableRecyclables = 0
+                        availablePickup = 0
                         r.append(0)
                         #totalDistance += self.distanceMatrix[optimalRoute[i - 1]][0]
                         i -= 1
@@ -124,22 +106,22 @@ class DistributionModel:
             key = 'VehicleCap:' + str(self.vehicles[v].capacity) + ',Trips:' + str(
                 tripsCount) + ',TotalDistance:' + str(self.routeDist(r))
             s = ''
-            for store in r:
+            for n in r:
                 if len(s) > 0:
                     s += '--->'
-                node = self.stores[store - 1]
-                if store != 0:
-                    s += '({}, delivery: {}, pickup: {}, tw = {})'.format(store, node.demand, node.recylables, node.tw)
+                node = self.nodes[n - 1]
+                if n != 0:
+                    s += '({}, D: {}, P: {}, tw = {})'.format(nodeName[n], node.delivery, node.pickup, node.tw)
                 else:
-                    s += '({}, tw = {})'.format(store, node.tw)
+                    s += '({})'.format(nodeName[n])
             distribution[key] = s
 
         return distribution
 
     def modelSummary(self):
-        print(f'No of Store: {self.noOfStore}')
-        print('Store details: ')
-        for s in self.stores:
+        print(f'No of node: {self.noOfNode}')
+        print('node details: ')
+        for s in self.nodes:
             print(s)
         print()
         print(f'No of Vehicle: {self.noOfVehicle}')
@@ -147,29 +129,23 @@ class DistributionModel:
         for v in self.vehicles:
             print(v)
         print('\nDistance matrix: ')
-        s = '{:>12s}'.format("Depot")
-        for k in range(len(self.stores)):
+        s = '{:>4s}'.format("")
+        for k in range(len(self.nodes)):
             s += '{:>8d}'.format(k + 1)
         print(s)
         for i in range(len(self.distanceMatrix)):
-            if i == 0:
-                s = "Depot\t"
-            else:
-                s = "Store{}\t".format(i)
+            s = "Node{}\t".format(i)
             for j in range(len(self.distanceMatrix)):
                 s += '{:4.1f}\t'.format(self.distanceMatrix[i][j])
             print(s)
 
         print('\nTime matrix: ')
-        s = '{:>12s}'.format("Depot")
-        for k in range(len(self.stores)):
+        s = '{:>4s}'.format("")
+        for k in range(len(self.nodes)):
             s += '{:>8d}'.format(k + 1)
         print(s)
         for i in range(len(self.timeMatrix)):
-            if i == 0:
-                s = "Depot\t"
-            else:
-                s = "Store{}\t".format(i)
+            s = "node{}\t".format(i)
             for j in range(len(self.timeMatrix)):
                 s += '{:4.1f}\t'.format(self.timeMatrix[i][j])
             print(s)
